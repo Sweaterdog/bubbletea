@@ -255,6 +255,12 @@ const (
 	KeyF18
 	KeyF19
 	KeyF20
+	// KeyShiftEnter and KeyCtrlEnter are reported on the Windows console, where
+	// the raw key event carries the Shift/Ctrl modifier for Return. Other
+	// platforms cannot distinguish these from a plain Enter without the Kitty
+	// keyboard protocol, so they are Windows-console-only in this build.
+	KeyShiftEnter
+	KeyCtrlEnter
 )
 
 // Mappings for control keys and other special keys to friendly consts.
@@ -301,6 +307,8 @@ var keyNames = map[KeyType]string{
 	KeyRight:          "right",
 	KeySpace:          " ", // for backwards compatibility
 	KeyLeft:           "left",
+	KeyShiftEnter:     "shift+enter",
+	KeyCtrlEnter:      "ctrl+enter",
 	KeyShiftTab:       "shift+tab",
 	KeyHome:           "home",
 	KeyEnd:            "end",

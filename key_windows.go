@@ -233,7 +233,18 @@ func keyType(e coninput.KeyEventRecord) KeyType {
 
 	switch code { //nolint:exhaustive
 	case coninput.VK_RETURN:
-		return KeyEnter
+		// The Windows console delivers the Shift/Ctrl modifier state with the
+		// Return key event, so surface Shift+Enter / Ctrl+Enter as distinct keys
+		// (upstream collapses them all to Enter). This lets apps bind them, e.g.
+		// Shift+Enter for a newline while Enter submits.
+		switch {
+		case shiftPressed:
+			return KeyShiftEnter
+		case ctrlPressed:
+			return KeyCtrlEnter
+		default:
+			return KeyEnter
+		}
 	case coninput.VK_BACK:
 		return KeyBackspace
 	case coninput.VK_TAB:
