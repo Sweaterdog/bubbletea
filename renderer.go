@@ -68,6 +68,16 @@ type renderer interface {
 	// currently enabled.
 	bracketedPasteActive() bool
 
+	// enableModifyOtherKeys asks the terminal to report modified keys that have
+	// no legacy encoding (e.g. Shift+Enter, Ctrl+Enter) using xterm's
+	// modifyOtherKeys level 1. Level 1 leaves ordinary keys, Esc and the arrow
+	// keys untouched, so it is safe; terminals that do not support it ignore the
+	// sequence.
+	enableModifyOtherKeys()
+
+	// disableModifyOtherKeys turns modifyOtherKeys reporting back off.
+	disableModifyOtherKeys()
+
 	// setWindowTitle sets the terminal window title.
 	setWindowTitle(string)
 

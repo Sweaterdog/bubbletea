@@ -661,6 +661,9 @@ func (p *Program) Run() (returnModel Model, returnErr error) {
 	if p.startupOptions&withoutBracketedPaste == 0 {
 		p.renderer.enableBracketedPaste()
 	}
+	// Ask for modified-key reporting so Shift+Enter / Ctrl+Enter are delivered
+	// as distinct keys on terminals that support it (safe no-op elsewhere).
+	p.renderer.enableModifyOtherKeys()
 	if p.startupOptions&withMouseCellMotion != 0 {
 		p.renderer.enableMouseCellMotion()
 		p.renderer.enableMouseSGRMode()
@@ -903,6 +906,7 @@ func (p *Program) RestoreTerminal() error {
 	if p.bpWasActive {
 		p.renderer.enableBracketedPaste()
 	}
+	p.renderer.enableModifyOtherKeys()
 	if p.reportFocus {
 		p.renderer.enableReportFocus()
 	}

@@ -470,6 +470,22 @@ func (r *standardRenderer) disableBracketedPaste() {
 	r.bpActive = false
 }
 
+func (r *standardRenderer) enableModifyOtherKeys() {
+	r.mtx.Lock()
+	defer r.mtx.Unlock()
+
+	// xterm modifyOtherKeys level 1: report only keys that otherwise have no
+	// encoding (Shift+Enter, Ctrl+Enter, ...). Unsupported terminals ignore it.
+	r.execute("\x1b[>4;1m")
+}
+
+func (r *standardRenderer) disableModifyOtherKeys() {
+	r.mtx.Lock()
+	defer r.mtx.Unlock()
+
+	r.execute("\x1b[>4;0m")
+}
+
 func (r *standardRenderer) bracketedPasteActive() bool {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()

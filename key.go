@@ -411,6 +411,17 @@ var sequences = map[string]Key{
 	// Miscellaneous keys
 	"\x1b[Z": {Type: KeyShiftTab},
 
+	// Shift+Enter / Ctrl+Enter reported by terminals with modified-key
+	// reporting enabled. Two encodings are covered so most modern terminals
+	// work: xterm modifyOtherKeys ("CSI 27;mod;13~") and the Kitty keyboard
+	// protocol ("CSI 13;mod;u"). Modifier code 2 = Shift, 5 = Ctrl. Enter's
+	// keycode is 13. These are exact-string matches, so they never affect the
+	// parsing of any other key.
+	"\x1b[27;2;13~": {Type: KeyShiftEnter},
+	"\x1b[27;5;13~": {Type: KeyCtrlEnter},
+	"\x1b[13;2u":    {Type: KeyShiftEnter},
+	"\x1b[13;5u":    {Type: KeyCtrlEnter},
+
 	"\x1b[2~":   {Type: KeyInsert},
 	"\x1b[3;2~": {Type: KeyInsert, Alt: true},
 
