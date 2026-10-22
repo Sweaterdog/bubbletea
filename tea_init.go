@@ -1,9 +1,5 @@
 package tea
 
-import (
-	"github.com/charmbracelet/lipgloss"
-)
-
 func init() {
 	// XXX: This is a workaround to make assure that Lip Gloss and Termenv
 	// query the terminal before any Bubble Tea Program runs and acquires the
@@ -17,6 +13,10 @@ func init() {
 	// Note that this will only affect programs running on the default IO i.e.
 	// [os.Stdout] and [os.Stdin].
 	//
+	// The question is answered quickly and without waiting on a terminal that
+	// never replies (see background.go), and the answer is handed to Lip Gloss
+	// so it never asks again while a Program owns the terminal.
+	//
 	// This workaround will be removed in v2.
-	_ = lipgloss.HasDarkBackground()
+	initBackground()
 }

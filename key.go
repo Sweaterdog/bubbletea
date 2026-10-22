@@ -560,6 +560,17 @@ func (u unknownInputByteMsg) String() string {
 	return fmt.Sprintf("?%#02x?", int(u))
 }
 
+// unknownOSCSequenceMsg is reported by the input reader for an OSC sequence on
+// the input: a terminal's reply to a query, such as the background colour
+// query made before the Program started (tea_init.go), that arrived after the
+// query stopped waiting. Like unknownCSISequenceMsg it is not handled further,
+// and it is never typed out as keys.
+type unknownOSCSequenceMsg []byte
+
+func (u unknownOSCSequenceMsg) String() string {
+	return fmt.Sprintf("?OSC%q?", []byte(u)[2:])
+}
+
 // unknownCSISequenceMsg is reported by the input reader when an
 // unrecognized CSI sequence is detected on the input. Currently, it
 // is not handled further by bubbletea. However, having this event
@@ -658,6 +669,14 @@ func detectOneMsg(b []byte, canHaveMoreData bool) (w int, msg Msg) {
 	var foundbp bool
 	foundbp, w, msg = detectBracketedPaste(b)
 	if foundbp {
+		return w, msg
+	}
+
+	// Detect a terminal's reply to a query (OSC), which must not be typed out
+	// as keys.
+	var foundOSC bool
+	foundOSC, w, msg = detectOSCReply(b, canHaveMoreData)
+	if foundOSC {
 		return w, msg
 	}
 

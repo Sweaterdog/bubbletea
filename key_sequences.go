@@ -128,3 +128,52 @@ func detectReportFocus(input []byte) (hasRF bool, width int, msg Msg) {
 	}
 	return false, 0, nil
 }
+
+// maxOSCReplyLen bounds an OSC reply: longer input is not taken for one.
+const maxOSCReplyLen = 512
+
+// detectOSCReply detects an OSC sequence a terminal sends back, "ESC ] Ps ; Pt"
+// ended by BEL or by ESC \, where Ps is a number and Pt printable text. That
+// is how a reply to a query arrives; Alt+] (ESC ]) followed by anything else is
+// not one and is left to the key parser.
+//
+// A reply cut off at the end of a full read buffer asks for more input; one cut
+// off at the end of a short read is not taken for a reply.
+func detectOSCReply(input []byte, canHaveMoreData bool) (hasOSC bool, width int, msg Msg) {
+	if len(input) < 3 || input[0] != '\x1b' || input[1] != ']' {
+		return false, 0, nil
+	}
+	i := 2
+	for i < len(input) && input[i] >= '0' && input[i] <= '9' {
+		i++
+	}
+	if i == 2 {
+		return false, 0, nil
+	}
+	if i == len(input) {
+		return canHaveMoreData, 0, nil
+	}
+	if input[i] != ';' {
+		return false, 0, nil
+	}
+	for i++; i < len(input) && i < maxOSCReplyLen; i++ {
+		switch c := input[i]; {
+		case c == '\a':
+			return true, i + 1, unknownOSCSequenceMsg(input[:i+1])
+		case c == '\x1b':
+			if i+1 == len(input) {
+				return canHaveMoreData, 0, nil
+			}
+			if input[i+1] == '\\' {
+				return true, i + 2, unknownOSCSequenceMsg(input[:i+2])
+			}
+			return false, 0, nil
+		case c < ' ' || c == 0x7f:
+			return false, 0, nil
+		}
+	}
+	if i == len(input) {
+		return canHaveMoreData, 0, nil
+	}
+	return false, 0, nil
+}
